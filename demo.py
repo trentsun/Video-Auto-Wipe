@@ -49,8 +49,9 @@ def read_frame_info_from_video(vname):
     frame_info['len'] = int(reader.get(cv2.CAP_PROP_FRAME_COUNT) + 0.5)
     return reader, frame_info
 
-def read_mask(path):
+def read_mask(path, frame_height, frame_width):
     img = cv2.imread(path, 0)
+    img = cv2.resize(img, (frame_width, frame_height))
     ret, img = cv2.threshold(img, 127, 1, cv2.THRESH_BINARY)
     img = img[:, :, None]
     return img
@@ -87,7 +88,7 @@ def pre_process(task):
 
     clip_gap = args.gap  # processing how many frames during one period
     rec_time = frame_info['len'] // clip_gap if frame_info['len'] % clip_gap == 0 else frame_info['len'] // clip_gap + 1
-    mask = read_mask(args.mask)
+    mask = read_mask(args.mask, frame_info['H_ori'], frame_info['W_ori'])
     return clip_gap, device, frame_info, mask, model, reader, rec_time, video_name, writer
 
 def process(frames, model, device, w, h):
